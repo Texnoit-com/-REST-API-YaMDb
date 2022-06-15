@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+
 USER_ROLE = (
     ('user', 'user'),
     ('moderator', 'moderator'),
@@ -19,7 +20,13 @@ class User(AbstractUser):
     email = models.EmailField(max_length=100,
                               verbose_name='Email',
                               help_text='Укажите email',
-                              unique=True)
+                              unique=True,
+                              blank=False,
+                              null=False)
+    confirmation_code = models.CharField(max_length=40,
+                                         null=True,
+                                         blank=True,
+                                         verbose_name='Проверочный код')
     first_name = models.CharField(max_length=100,
                                   verbose_name='Имя',
                                   help_text='Укажите Имя',
@@ -33,10 +40,10 @@ class User(AbstractUser):
                            help_text='Укажите Биографию',
                            blank=True,)
     role = models.CharField(max_length=100,
-                            verbose_name='Биография',
-                            help_text='Укажите Биографию',
+                            verbose_name='Роль',
                             choices=USER_ROLE,
-                            default='user')
+                            default='user',
+                            help_text='Роль пользователя')
 
     def __str__(self):
         return self.username
