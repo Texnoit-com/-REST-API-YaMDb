@@ -13,11 +13,6 @@ class SignUpSerializer(serializers.ModelSerializer):
             'username',
             'email', )
 
-    def validate_username(self, data):
-        if data['username'] == 'me':
-            raise ValidationError('Использовать me в качестве имени запрещено')
-        return data
-
     def validate_exist(self, attrs):
 
         username = attrs.get('username')
@@ -34,6 +29,12 @@ class SignUpSerializer(serializers.ModelSerializer):
 class TokenSerializer(serializers.ModelSerializer):
     username = serializers.CharField()
     confirmation_code = serializers.CharField()
+
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'confirmation_code')
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -63,11 +64,6 @@ class SignUpSerializer(serializers.ModelSerializer):
         fields = (
             'username',
             'email', )
-
-    def validate_username(self, data):
-        if data['username'] == 'me':
-            raise ValidationError('Использовать me в качестве имени запрещено')
-        return data
 
     def validate_exist(self, attrs):
 

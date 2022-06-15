@@ -3,6 +3,7 @@ import datetime
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from review.validators import validate_user
 
 
 USER_ROLE = (
@@ -16,7 +17,8 @@ class User(AbstractUser):
     username = models.CharField(max_length=100,
                                 verbose_name='Логин',
                                 help_text='Укажите логин',
-                                unique=True)
+                                unique=True,
+                                validators=[validate_user])
     email = models.EmailField(max_length=100,
                               verbose_name='Email',
                               help_text='Укажите email',
