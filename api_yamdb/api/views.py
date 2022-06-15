@@ -12,8 +12,14 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import action
 from review.models import Category, Genre, Review, Title, User
 
+<<<<<<< HEAD
 from .serializers import (CommentSerializer, ReviewSerializer,
                           SignUpSerializer, TokenSerializer, UserSerializer)
+=======
+from review.models import Review, Title, User
+from .serializers import (SignUpSerializer, TokenSerializer, UserSerializer,
+                          CommentSerializer, ReviewSerializer)
+>>>>>>> c6875f6 (Auth ver_1.7)
 from .permissions import IsAdminPermission
 
 
