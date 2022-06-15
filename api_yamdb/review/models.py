@@ -55,6 +55,7 @@ class User(AbstractUser):
 
 
 class Genre (models.Model):
+    "Модель для жанра"
     name = models.CharField(max_length=100,
                             verbose_name='Жанр',
                             help_text='Укажите жанр',
@@ -73,6 +74,7 @@ class Genre (models.Model):
 
 
 class Category(models.Model):
+    "Модель для категории"
     name = models.CharField(max_length=100,
                             verbose_name='Жанр',
                             help_text='Укажите жанр',
@@ -91,22 +93,22 @@ class Category(models.Model):
 
 
 class Title(models.Model):
+    "Модель для заголовка"
     name = models.CharField(max_length=100,
                             verbose_name='Произведение',
                             help_text='Укажите название произведения')
     year = models.PositiveSmallIntegerField(
+        db_index=True,
         verbose_name='Дата выхода произведения',
         help_text='Укажите дату выхода',
         validators=(MinValueValidator(0),
                     MaxValueValidator(datetime.date.today().year)))
-    rating = models.PositiveIntegerField(verbose_name='Рейтинг',
-                                         help_text='Укажите рейтинг',
-                                         default=0,
-                                         null=True)
+
     description = models.CharField(max_length=1000,
                                    verbose_name='Произведение',
                                    help_text='Укажите название произведения',
-                                   null=True)
+                                   null=True,
+                                   blank=True,)
     genre = models.ManyToManyField('Genre',
                                    related_name='titles',
                                    verbose_name='Жанры произведения',
