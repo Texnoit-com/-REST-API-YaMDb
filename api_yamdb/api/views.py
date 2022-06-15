@@ -1,5 +1,4 @@
 from django.core.exceptions import PermissionDenied
-<<<<<<< HEAD
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
@@ -7,29 +6,14 @@ from django.conf import settings
 from rest_framework import viewsets, permissions, status, filters
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-=======
-from django.shortcuts import get_object_or_404, render
-from rest_framework import viewsets, permissions, status, filters
-from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from review.models import Category, Genre, Review, Title, User
-from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
-from django.conf import settings
->>>>>>> b9781ad (Auth ver_1.1)
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import action
 
-<<<<<<< HEAD
 from review.models import Review, Title, User
 from .serializers import (SignUpSerializer, TokenSerializer, UserSerializer,
                           CommentSerializer, ReviewSerializer)
-=======
-from .serializers import (CommentSerializer, ReviewSerializer,
-                          SignUpSerializer, TokenSerializer, UserSerializer)
->>>>>>> b9781ad (Auth ver_1.1)
 from .permissions import IsAdminPermission
 
 

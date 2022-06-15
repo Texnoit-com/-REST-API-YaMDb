@@ -1,9 +1,6 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
-<<<<<<< HEAD
 from review.models import Category, Comment, Genre, Review, Title, User
-=======
->>>>>>> b9781ad (Auth ver_1.1)
 from rest_framework.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 
@@ -59,7 +56,6 @@ class UserSerializer(serializers.ModelSerializer):
         if user.role == 'user' and 'role' in attrs and not user.is_superuser:
             attrs['role'] = 'user'
         return super().validate(attrs)
-<<<<<<< HEAD
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -156,5 +152,3 @@ class TitleCreateSerialaizer(serializers.ModelSerializer):
                 fields=('name', 'year', 'category',)
             )
         ]
-=======
->>>>>>> b9781ad (Auth ver_1.1)
