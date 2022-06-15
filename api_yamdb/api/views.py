@@ -1,5 +1,5 @@
 from django.core.exceptions import PermissionDenied
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.conf import settings
@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import action
-from review.models import Category, Genre, Review, Title, User
+from review.models import Review, Title, User
 
 from .serializers import (CommentSerializer, ReviewSerializer,
                           SignUpSerializer, TokenSerializer, UserSerializer)
