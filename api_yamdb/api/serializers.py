@@ -12,7 +12,12 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    pass
+    author = serializers.SlugRelatedField(read_only=True,
+                                          slug_field='username')
+
+    class Meta:
+        model = Comment
+        fields = ('id', 'text', 'author', 'pub_date')
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -24,7 +29,30 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    pass
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username',
+        default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = Review
+        fields = ('id', 'text', 'author', 'score', 'pub_date',)
+
+    def validate(self, data):
+        if self.context.get('request').method != 'POST':
+            return data
+        reviewer = self.context.get('request').user
+        title_id = self.context['view'].kwargs['title_id']
+        if Review.objects.filter(author=reviewer, title__id=title_id).exists():
+            raise serializers.ValidationError(
+                'Оставлять отзыв на одно произведение дважды запрещено!'
+            )
+        return data
+
+    def check_score(self, value):
+        if value in range(1, 11):
+            return value
+        raise serializers.ValidationError('Вне диапазона 0-10.')
 
 
 class TitleSerializer(serializers.ModelSerializer):
