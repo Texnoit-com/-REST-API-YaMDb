@@ -2,10 +2,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from review.models import Category, Comment, Genre, Review, Title, User
 from django.shortcuts import get_object_or_404
-<<<<<<< HEAD
 from rest_framework.exceptions import ValidationError
-=======
->>>>>>> c6875f6 (Auth ver_1.7)
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -204,7 +201,4 @@ class TitleCreateSerialaizer(serializers.ModelSerializer):
                 fields=('name', 'year', 'category',)
             )
         ]
-<<<<<<< HEAD
     pass
-=======
->>>>>>> c6875f6 (Auth ver_1.7)
