@@ -5,23 +5,43 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from api_yamdb.settings import ADMIN_EMAIL
 from rest_framework import viewsets, permissions, status, filters
-from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import action
 from review.models import Category, Genre, Review, Title, User
-
+from ..review.filters import TitleFilterSet
 from .serializers import (CommentSerializer, ReviewSerializer,
-                          SignUpSerializer, TokenSerializer, UserSerializer)
+                          CategorySerializer, GenreSerializer,
+                          TitleSerializer, TitleCreateSerialaizer)
 from .permissions import IsAdminPermission
-
+from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Avg
 User = get_user_model()
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CreateDeleteListViewSet(
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet
+):
     pass
+
+class CategoryViewSet(CreateDeleteListViewSet):
+    """Вьюсет для категорий."""
+
+    queryset = Category.objects.all().order_by('id')
+    serializer_class = CategorySerializer
+    permission_classes = [
+        IsAdminOrReadOnly,
+    ]
+    pagination_class = LimitOffsetPagination
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -52,8 +72,18 @@ class CommentViewSet(viewsets.ModelViewSet):
         super(CommentViewSet, self).perform_destroy(instance)
 
 
-class GenreViewSet(viewsets.ModelViewSet):
-    pass
+class GenreViewSet(CreateDeleteListViewSet):
+    """Вьюсет для жанров."""
+
+    queryset = Genre.objects.all().order_by('id')
+    serializer_class = GenreSerializer
+    permission_classes = [
+        IsAdminOrReadOnly,
+    ]
+    pagination_class = PageNumberPagination
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -82,7 +112,22 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    pass
+    """Вьюсет для заголовков."""
+
+    queryset = Title.objects.all().annotate(
+        Avg('reviews__score')
+    ).order_by('name')
+    serializer_class = TitleSerializer
+    permission_classes = [
+        IsAdminOrReadOnly,
+    ]
+    pagination_class = PageNumberPagination
+    filterset_class = TitleFilterSet
+
+    def get_serializer_class(self):
+        if self.request.method in ('POST', 'PATCH'):
+            return TitleCreateSerialaizer
+        return TitleSerializer
 
 
 class ConfCodeView(APIView):
