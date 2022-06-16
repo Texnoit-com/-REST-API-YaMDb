@@ -1,15 +1,38 @@
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, render
-from rest_framework import viewsets
-from rest_framework.pagination import LimitOffsetPagination
+from rest_framework import viewsets, mixins, filters
+from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from django.db.models import Avg
+from django_filters.rest_framework import DjangoFilterBackend
+from ..review.filters import TitleFilterSet
 from review.models import Category, Genre, Review, Title, User
 
-from .serializers import CommentSerializer, ReviewSerializer
+from .serializers import (CommentSerializer, ReviewSerializer,
+                          CategorySerializer, GenreSerializer,
+                          TitleSerializer, TitleCreateSerialaizer)
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CreateDeleteListViewSet(
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet
+):
     pass
+
+class CategoryViewSet(CreateDeleteListViewSet):
+    """Вьюсет для категорий."""
+
+    queryset = Category.objects.all().order_by('id')
+    serializer_class = CategorySerializer
+    permission_classes = [
+        IsAdminOrReadOnly,
+    ]
+    pagination_class = LimitOffsetPagination
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -40,8 +63,18 @@ class CommentViewSet(viewsets.ModelViewSet):
         super(CommentViewSet, self).perform_destroy(instance)
 
 
-class GenreViewSet(viewsets.ModelViewSet):
-    pass
+class GenreViewSet(CreateDeleteListViewSet):
+    """Вьюсет для жанров."""
+
+    queryset = Genre.objects.all().order_by('id')
+    serializer_class = GenreSerializer
+    permission_classes = [
+        IsAdminOrReadOnly,
+    ]
+    pagination_class = PageNumberPagination
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -70,7 +103,22 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    pass
+    """Вьюсет для заголовков."""
+
+    queryset = Title.objects.all().annotate(
+        Avg('reviews__score')
+    ).order_by('name')
+    serializer_class = TitleSerializer
+    permission_classes = [
+        IsAdminOrReadOnly,
+    ]
+    pagination_class = PageNumberPagination
+    filterset_class = TitleFilterSet
+
+    def get_serializer_class(self):
+        if self.request.method in ('POST', 'PATCH'):
+            return TitleCreateSerialaizer
+        return TitleSerializer
 
 
 class UsersViewSet(viewsets.ModelViewSet):
