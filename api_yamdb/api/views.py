@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from django.conf import settings
+from api_yamdb.settings import ADMIN_EMAIL
 from rest_framework import viewsets, permissions, status, filters
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -102,7 +102,7 @@ class ConfCodeView(APIView):
             subject='Код подтверждения регистрации',
             message='Вы зарегистрировались на YAMDB!'
                     f'Ваш код подтвержения: {confirmation_code}',
-            from_email=settings.ADMIN_EMAIL,
+            from_email=ADMIN_EMAIL,
             recipient_list=[email],
             fail_silently=False,
         )
