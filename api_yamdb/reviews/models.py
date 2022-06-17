@@ -3,8 +3,8 @@ import datetime
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from review.validators import validate_user
 
+from .validators import validate_user
 
 USER_ROLE = (
     ('user', 'user'),
@@ -112,6 +112,7 @@ class Title(models.Model):
         help_text='Укажите дату выхода',
         validators=(MinValueValidator(0),
                     MaxValueValidator(datetime.date.today().year)))
+    rating = models.IntegerField('Рейтинг', null=True)
 
     description = models.CharField(max_length=1000,
                                    verbose_name='Произведение',
@@ -163,6 +164,12 @@ class Review(models.Model):
     class Meta:
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
+        constraints = [
+            models.UniqueConstraint(
+                fields=('author', 'title'),
+                name='unique_author_title'
+            )
+        ]
 
     def __str__(self):
         return self.text[0:100]
