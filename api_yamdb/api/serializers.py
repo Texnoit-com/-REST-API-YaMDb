@@ -1,54 +1,56 @@
-from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
-from review.models import Category, Comment, Genre, Review, Title, User
 from django.shortcuts import get_object_or_404
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
+from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
 class SignUpSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = (
-            'username',
-            'email', )
+        fields = ('username', 'email', )
 
     def validate_exist(self, attrs):
-
         username = attrs.get('username')
         if_user = User.objects.filter(username=username)
         if if_user.exists():
             raise ValidationError('Пользователь с таким именем уже существует')
-
         email = attrs.get('email')
         if_email = User.objects.filter(email=email)
         if if_email.exists():
             raise ValidationError('Почта уже использовалась')
 
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError(
+                'Имя пользователя "me" не разрешено.'
+            )
+        return value
+
 
 class TokenSerializer(serializers.ModelSerializer):
-    username = serializers.CharField()
-    confirmation_code = serializers.CharField()
+    username = serializers.CharField(required=True)
+    confirmation_code = serializers.CharField(required=True)
 
     class Meta:
         model = User
-        fields = (
-            'username',
-            'confirmation_code')
+        fields = ('username', 'confirmation_code')
 
 
 class UserSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(required=True)
+    email = serializers.CharField(required=True)
+    role = serializers.StringRelatedField(read_only=True)
 
     class Meta:
         model = User
-        fields = (
-            'username',
-            'email',
-            'first_name',
-            'last_name',
-            'bio',
-            'role'
-        )
+        fields = ('username',
+                  'email',
+                  'first_name',
+                  'last_name',
+                  'bio',
+                  'role')
 
     def validate_role(self, attrs):
         user = get_object_or_404(User, id=id)
@@ -56,55 +58,36 @@ class UserSerializer(serializers.ModelSerializer):
             attrs['role'] = 'user'
         return super().validate(attrs)
 
-
-class SignUpSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = User
-        fields = (
-            'username',
-            'email', )
-
-    def validate_exist(self, attrs):
-
-        username = attrs.get('username')
-        if_user = User.objects.filter(username=username)
-        if if_user.exists():
-            raise ValidationError('Пользователь с таким именем уже существует')
-
-        email = attrs.get('email')
-        if_email = User.objects.filter(email=email)
-        if if_email.exists():
-            raise ValidationError('Почта уже использовалась')
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError(
+                'Имя пользователя "me" не разрешено.'
+            )
+        return value
 
 
-class TokenSerializer(serializers.ModelSerializer):
-    username = serializers.CharField()
-    confirmation_code = serializers.CharField()
-
-
-class UserSerializer(serializers.ModelSerializer):
+class AdminUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
         fields = (
-            'username',
-            'email',
-            'first_name',
-            'last_name',
-            'bio',
-            'role'
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role',
         )
 
-    def validate_role(self, attrs):
-        user = get_object_or_404(User, id=id)
-        if user.role == 'user' and 'role' in attrs and not user.is_superuser:
-            attrs['role'] = 'user'
-        return super().validate(attrs)
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError(
+                'Имя пользователя "me" не разрешено.'
+            )
+        return value
 
 
 class CategorySerializer(serializers.ModelSerializer):
     """Сериализатор для категорий"""
+    slug = serializers.CharField(
+        allow_blank=False,
+        validators=[UniqueValidator(queryset=Category.objects.all())]
+    )
 
     class Meta:
         fields = ('name', 'slug')
@@ -122,6 +105,10 @@ class CommentSerializer(serializers.ModelSerializer):
 
 class GenreSerializer(serializers.ModelSerializer):
     """Сериализатор для жанров"""
+    slug = serializers.CharField(
+        allow_blank=False,
+        validators=[UniqueValidator(queryset=Genre.objects.all())]
+    )
 
     class Meta:
         fields = ('name', 'slug')
@@ -157,12 +144,12 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализатор для заголовков"""
-    genre = GenreSerializer(
-        many=True,
-        required=True,
+    genre = GenreSerializer(many=True, required=True,)
+    category = CategorySerializer(many=False, read_only=True)
+    rating = serializers.FloatField(
+        source='reviews__score__avg',
+        read_only=True
     )
-    category = CategorySerializer(required=True)
-    rating = serializers.IntegerField()
 
     class Meta:
         model = Title
@@ -197,4 +184,3 @@ class TitleCreateSerialaizer(serializers.ModelSerializer):
                 fields=('name', 'year', 'category',)
             )
         ]
-    pass

@@ -33,7 +33,7 @@ Cоздать и активировать виртуальное окружен�
 
 ```
 python3 -m venv venv
-source venv/bin/activate```
+source venv/bin/activate
 ```
 Установить зависимости из файла requirements.txt:
 ```
