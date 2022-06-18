@@ -64,7 +64,6 @@ class User(AbstractUser):
 
 
 class Genre (models.Model):
-    "Модель для жанра"
     name = models.CharField(max_length=100,
                             verbose_name='Жанр',
                             help_text='Укажите жанр',
@@ -83,7 +82,6 @@ class Genre (models.Model):
 
 
 class Category(models.Model):
-    "Модель для категории"
     name = models.CharField(max_length=100,
                             verbose_name='Жанр',
                             help_text='Укажите жанр',
@@ -102,7 +100,6 @@ class Category(models.Model):
 
 
 class Title(models.Model):
-    "Модель для заголовка"
     name = models.CharField(max_length=100,
                             verbose_name='Произведение',
                             help_text='Укажите название произведения')
