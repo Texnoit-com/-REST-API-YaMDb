@@ -26,7 +26,7 @@ from .serializers import (AdminUserSerializer, CategorySerializer,
 
 
 class CategoryViewSet(CreateDeleteListViewSet):
-    """Вьюсет для категорий."""
+    '''Вьюсет для категорий.'''
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -75,7 +75,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 class GenreViewSet(CreateDeleteListViewSet):
-    """Вьюсет для жанров."""
+    '''Вьюсет для жанров.'''
 
     queryset = Genre.objects.all().order_by('id')
     serializer_class = GenreSerializer
@@ -121,7 +121,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    """Вьюсет для заголовков."""
+    '''Вьюсет для заголовков.'''
 
     queryset = Title.objects.all().annotate(
         Avg('reviews__score')
@@ -137,10 +137,10 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 class ConfCodeView(APIView):
-    """
+    '''
     При получении POST-запроса с email и username отправляет
     письмо с confirmation_code на email.
-    """
+    '''
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
@@ -161,10 +161,10 @@ class ConfCodeView(APIView):
 
 
 class TokenView(APIView):
-    """
+    '''
     При получении POST-запроса с username и confirmation_code
     возвращает JWT-токен.
-    """
+    '''
     permission_classes = (AllowAny,)
 
     def post(self, request):
