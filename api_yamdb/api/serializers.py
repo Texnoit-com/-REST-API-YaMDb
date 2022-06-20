@@ -2,7 +2,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
-from reviews.models import Category, Comment, Genre, Review, Title, User
+from reviews.models import Category, Comment, Genre, Review, Title
+from user.models import User
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -54,7 +55,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def validate_role(self, attrs):
         user = get_object_or_404(User, id=id)
-        if user.role == 'user' and 'role' in attrs and not user.is_superuser:
+        if user.is_admin and 'role' in attrs and not user.is_superuser:
             attrs['role'] = 'user'
         return super().validate(attrs)
 
@@ -129,7 +130,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         if self.context.get('request').method != 'POST':
             return data
         reviewer = self.context.get('request').user
-        title_id = self.context['view'].kwargs['title_id']
+        title_id = self.context.get('view').kwargs['title_id']
         if Review.objects.filter(author=reviewer, title__id=title_id).exists():
             raise serializers.ValidationError(
                 'Оставлять отзыв на одно произведение дважды запрещено!'

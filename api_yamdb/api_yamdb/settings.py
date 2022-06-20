@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'django_filters',
     'api',
     'reviews',
+    'user',
 ]
 
 MIDDLEWARE = [
@@ -104,7 +105,7 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
 
-AUTH_USER_MODEL = 'reviews.User'
+AUTH_USER_MODEL = 'user.User'
 EMPTY = '-'
 
 REST_FRAMEWORK = {
@@ -129,3 +130,5 @@ EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'tmp/email')
 EMAIL_HOST = 'localhost'
 EMAIL_PORT = 25
 ADMIN_EMAIL = 'admin@api_yamdb.com'
+
+LEN_OUTPUT = 100

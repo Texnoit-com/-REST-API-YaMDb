@@ -13,12 +13,13 @@ from rest_framework.permissions import (AllowAny, IsAuthenticated,
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from reviews.models import Category, Genre, Review, Title, User
+from reviews.filters import TitleFilterSet
+from reviews.models import Category, Genre, Review, Title
+from user.models import User
 
 from .email import send_confirmation_code
-from .filters import TitleFilterSet
 from .mixins import CreateDeleteListViewSet
-from .permissions import IsAdmin, IsRoleAdmin
+from .permissions import AdminOrReadOnly, IsAdmin, IsAuthorOrModer, IsRoleAdmin
 from .serializers import (AdminUserSerializer, CategorySerializer,
                           CommentSerializer, GenreSerializer, ReviewSerializer,
                           SignUpSerializer, TitleCreateSerialaizer,
@@ -48,7 +49,8 @@ class CategoryViewSet(CreateDeleteListViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticatedOrReadOnly, 
+                          IsAuthorOrModer)
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
@@ -62,42 +64,28 @@ class CommentViewSet(viewsets.ModelViewSet):
         new_review = get_object_or_404(Review, pk=review_id)
         serializer.save(author=self.request.user, review=new_review)
 
-    def perform_update(self, serializer):
-        if serializer.instance.author != self.request.user:
-            raise PermissionDenied('Изменение чужого комментария запрещено!')
-        super(CommentViewSet, self).perform_update(serializer)
-
-    def perform_destroy(self, instance):
-        if not (instance.author == self.request.user
-                or self.request.user.is_moderator):
-            raise PermissionDenied('Удаление чужого комментария запрещено!')
-        super(CommentViewSet, self).perform_destroy(instance)
-
 
 class GenreViewSet(CreateDeleteListViewSet):
     '''Вьюсет для жанров.'''
 
     queryset = Genre.objects.all().order_by('id')
     serializer_class = GenreSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, IsAdmin,)
+    permission_classes = (AdminOrReadOnly,)
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
 
     def destroy(self, request, *args, **kwargs):
         genre = get_object_or_404(Genre, slug=kwargs['pk'])
-        if request.user.is_admin or request.user.is_superuser:
-            self.perform_destroy(genre)
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(status=status.HTTP_403_FORBIDDEN)
-
-    def perform_destroy(self, genre):
         genre.delete()
+        #Незнаю как сделать без переопрееления. Для возврата 204
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticatedOrReadOnly,
+                          IsAuthorOrModer,)
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
@@ -107,17 +95,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
         serializer.save(author=self.request.user, title=title)
-
-    def perform_update(self, serializer):
-        if serializer.instance.author != self.request.user:
-            raise PermissionDenied('Изменение чужого отзыва запрещено!')
-        super(ReviewViewSet, self).perform_update(serializer)
-
-    def perform_destroy(self, instance):
-        if not (instance.author == self.request.user
-                or self.request.user.is_moderator):
-            raise PermissionDenied('Удаление чужого отзыва запрещено!')
-        super(ReviewViewSet, self).perform_destroy(instance)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -178,7 +155,7 @@ class TokenView(APIView):
             return Response({'Неверный код'},
                             status=status.HTTP_400_BAD_REQUEST)
         token = RefreshToken.for_user(user)
-        return Response({'token': str(token.access_token)},
+        return Response({'token': token.access_token},
                         status=status.HTTP_200_OK)
 
 
