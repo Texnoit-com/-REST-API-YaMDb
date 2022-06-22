@@ -26,8 +26,6 @@ from .serializers import (AdminUserSerializer, CategorySerializer,
 
 
 class CategoryViewSet(CreateDeleteListViewSet):
-    '''Вьюсет для категорий.'''
-
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (IsAuthenticatedOrReadOnly, IsAdmin,)
@@ -48,7 +46,7 @@ class CategoryViewSet(CreateDeleteListViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, 
+    permission_classes = (IsAuthenticatedOrReadOnly,
                           IsAuthorOrModer)
     pagination_class = LimitOffsetPagination
 
@@ -65,8 +63,6 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 class GenreViewSet(CreateDeleteListViewSet):
-    '''Вьюсет для жанров.'''
-
     queryset = Genre.objects.all().order_by('id')
     serializer_class = GenreSerializer
     permission_classes = (AdminOrReadOnly,)
@@ -98,8 +94,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    '''Вьюсет для заголовков.'''
-
     queryset = Title.objects.all().annotate(
         Avg('reviews__score')
     ).order_by('name')
