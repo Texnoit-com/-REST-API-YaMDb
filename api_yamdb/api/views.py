@@ -73,7 +73,6 @@ class GenreViewSet(CreateDeleteListViewSet):
     def destroy(self, request, *args, **kwargs):
         genre = get_object_or_404(Genre, slug=kwargs['pk'])
         genre.delete()
-        #Незнаю как сделать без переопрееления. Для возврата 204
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
