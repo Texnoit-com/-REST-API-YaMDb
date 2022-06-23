@@ -2,7 +2,6 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
-
 from reviews.models import Category, Comment, Genre, Review, Title
 from user.models import User
 
@@ -137,11 +136,6 @@ class ReviewSerializer(serializers.ModelSerializer):
                 'Оставлять отзыв на одно произведение дважды запрещено!'
             )
         return data
-
-    def check_score(self, value):
-        if value in range(1, 11):
-            return value
-        raise serializers.ValidationError('Вне диапазона 0-10.')
 
 
 class TitleSerializer(serializers.ModelSerializer):

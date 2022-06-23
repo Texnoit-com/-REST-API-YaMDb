@@ -1,4 +1,4 @@
-from api_yamdb.settings import ADMIN_EMAIL
+from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db.models import Avg
@@ -123,7 +123,7 @@ class ConfCodeView(APIView):
             subject='Код подтверждения регистрации',
             message='Вы зарегистрировались на YAMDB!'
                     f'Ваш код подтвержения: {confirmation_code}',
-            from_email=ADMIN_EMAIL,
+            from_email=settings.ADMIN_EMAIL,
             recipient_list=[email],
             fail_silently=False,
         )

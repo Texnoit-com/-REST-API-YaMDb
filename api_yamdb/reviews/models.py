@@ -1,4 +1,4 @@
-from api_yamdb.settings import LEN_OUTPUT
+from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
@@ -113,7 +113,7 @@ class Review(models.Model):
         ]
 
     def __str__(self):
-        return self.text[:LEN_OUTPUT]
+        return self.text[:settings.LEN_OUTPUT]
 
 
 class Comment(models.Model):
@@ -137,4 +137,4 @@ class Comment(models.Model):
         verbose_name_plural = 'Комментарии'
 
     def __str__(self):
-        return self.text[:LEN_OUTPUT]
+        return self.text[:settings.LEN_OUTPUT]
