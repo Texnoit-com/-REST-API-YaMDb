@@ -1,69 +1,13 @@
-import datetime
-
-from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils import timezone
 
-from .validators import validate_user
-
-USER_ROLE = (
-    ('user', 'user'),
-    ('moderator', 'moderator'),
-    ('admin', 'admin'),
-)
+from user.models import User
 
 
-class User(AbstractUser):
-    username = models.CharField(max_length=100,
-                                verbose_name='Логин',
-                                help_text='Укажите логин',
-                                unique=True,
-                                validators=[validate_user])
-    email = models.EmailField(max_length=100,
-                              verbose_name='Email',
-                              help_text='Укажите email',
-                              unique=True,
-                              blank=False,
-                              null=False)
-    confirmation_code = models.CharField(max_length=40,
-                                         null=True,
-                                         blank=True,
-                                         verbose_name='Проверочный код')
-    first_name = models.CharField(max_length=100,
-                                  verbose_name='Имя',
-                                  help_text='Укажите Имя',
-                                  blank=True)
-    last_name = models.CharField(max_length=100,
-                                 verbose_name='Фамилия',
-                                 help_text='Укажите Фамилию',
-                                 blank=True)
-    bio = models.TextField(max_length=1000,
-                           verbose_name='Биография',
-                           help_text='Укажите Биографию',
-                           blank=True,)
-    role = models.CharField(max_length=100,
-                            verbose_name='Роль',
-                            choices=USER_ROLE,
-                            default='user',
-                            help_text='Роль пользователя')
-
-    def __str__(self):
-        return self.username
-
-    @property
-    def is_admin(self):
-        return self.is_staff or self.role == 'admin'
-
-    @property
-    def is_moderator(self):
-        return self.role == 'moderator'
-
-    class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
-
-
-class Genre (models.Model):
+class Genre(models.Model):
+    '''Модель Жанры'''
     name = models.CharField(max_length=100,
                             verbose_name='Жанр',
                             help_text='Укажите жанр',
@@ -82,6 +26,7 @@ class Genre (models.Model):
 
 
 class Category(models.Model):
+    '''Модель категория'''
     name = models.CharField(max_length=100,
                             verbose_name='Жанр',
                             help_text='Укажите жанр',
@@ -100,6 +45,7 @@ class Category(models.Model):
 
 
 class Title(models.Model):
+    '''Модель произведения'''
     name = models.CharField(max_length=100,
                             verbose_name='Произведение',
                             help_text='Укажите название произведения')
@@ -108,13 +54,11 @@ class Title(models.Model):
         verbose_name='Дата выхода произведения',
         help_text='Укажите дату выхода',
         validators=(MinValueValidator(0),
-                    MaxValueValidator(datetime.date.today().year)))
-    rating = models.IntegerField('Рейтинг', null=True)
+                    MaxValueValidator(timezone.now().year)))
 
     description = models.CharField(max_length=1000,
                                    verbose_name='Произведение',
                                    help_text='Укажите название произведения',
-                                   null=True,
                                    blank=True,)
     genre = models.ManyToManyField('Genre',
                                    related_name='titles',
@@ -138,6 +82,7 @@ class Title(models.Model):
 
 
 class Review(models.Model):
+    '''Модель Отзыв'''
     title = models.ForeignKey('Title',
                               on_delete=models.CASCADE,
                               related_name='reviews',
@@ -146,7 +91,7 @@ class Review(models.Model):
     text = models.TextField(max_length=1000,
                             verbose_name='Отзыв',
                             help_text='Напишите Отзыв')
-    author = models.ForeignKey('User',
+    author = models.ForeignKey(User,
                                on_delete=models.CASCADE,
                                related_name='reviews',
                                verbose_name='Автор отзыва')
@@ -169,10 +114,11 @@ class Review(models.Model):
         ]
 
     def __str__(self):
-        return self.text[0:100]
+        return self.text[:settings.LEN_OUTPUT]
 
 
 class Comment(models.Model):
+    '''Модель комментариев'''
     review = models.ForeignKey('Review',
                                on_delete=models.CASCADE,
                                related_name='comments',
@@ -180,7 +126,7 @@ class Comment(models.Model):
     text = models.TextField(max_length=1000,
                             verbose_name='Комментарий',
                             help_text='Укажите комментарий')
-    author = models.ForeignKey('User',
+    author = models.ForeignKey(User,
                                on_delete=models.CASCADE,
                                related_name='comments',
                                verbose_name='Автор комментария')
@@ -192,4 +138,4 @@ class Comment(models.Model):
         verbose_name_plural = 'Комментарии'
 
     def __str__(self):
-        return self.text[:100]
+        return self.text[:settings.LEN_OUTPUT]
